@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Forever With You</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --cream:#f5f0e8;--warm-white:#fdfaf5;--gold:#c9a96e;--gold-light:#e8d5b0;
+  --gold-dark:#a07840;--text-dark:#2a2118;--text-mid:#6b5d4e;--text-light:#a0917f;
+  --error:#c0392b;--shadow:rgba(42,33,24,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+.screen{display:none}.screen.active{display:flex}
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:0.7}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes typingPulse{0%,80%,100%{transform:scale(0.5);opacity:0.25}40%{transform:scale(1);opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* Common */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;letter-spacing:.04em;border:none;border-radius:10px;cursor:pointer;transition:all .2s;padding:11px 22px;text-decoration:none}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,#d4a96e,#c9a96e,#b8934e);color:#fff;box-shadow:0 4px 16px rgba(201,169,110,.4)}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,169,110,.5)}
+.btn-outline{background:transparent;color:var(--text-dark);border:1.5px solid rgba(201,169,110,.4)}
+.btn-outline:hover:not(:disabled){border-color:var(--gold);background:rgba(201,169,110,.06)}
+.btn-ghost{background:transparent;color:var(--text-mid);padding:8px 16px}
+.btn-ghost:hover{color:var(--text-dark)}
+.btn-danger{background:rgba(192,57,43,.07);color:var(--error);border:1.5px solid rgba(192,57,43,.2)}
+.input-group{margin-bottom:15px}
+.input-group label{display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-dark);font-weight:500;margin-bottom:6px}
+.input-group input,.input-group textarea,.input-group select{width:100%;background:var(--cream);border:1.5px solid rgba(201,169,110,.28);border-radius:10px;padding:11px 15px;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--text-dark);outline:none;transition:border-color .2s,box-shadow .2s;resize:none}
+.input-group input:focus,.input-group textarea:focus,.input-group select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,110,.12)}
+.input-group input::placeholder,.input-group textarea::placeholder{color:var(--text-light);font-style:italic}
+.error-banner{background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.2);color:var(--error);border-radius:8px;padding:10px 14px;font-size:.85rem;margin-bottom:16px;display:none}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+.orb1{position:fixed;top:-15%;right:-5%;width:500px;height:500px;background:radial-gradient(circle,rgba(201,169,110,.13) 0%,transparent 70%);border-radius:50%;pointer-events:none;z-index:0}
+.orb2{position:fixed;bottom:-15%;left:-5%;width:400px;height:400px;background:radial-gradient(circle,rgba(201,169,110,.09) 0%,transparent 70%);border-radius:50%;pointer-events:none;z-index:0}
+
+/* ── AUTH SCREENS ── */
+#screen-login,#screen-register{min-height:100vh;align-items:center;justify-content:center;padding:24px;position:relative}
+.auth-box{position:relative;z-index:1;width:100%;max-width:430px;animation:fadeUp .7s ease both}
+.logo{text-align:center;margin-bottom:32px}
+.logo-icon{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#e8d5b0,#c9a96e);display:flex;align-items:center;justify-content:center;margin:0 auto 13px;font-size:20px;color:#fff;box-shadow:0 4px 20px rgba(201,169,110,.35);animation:float 3s ease-in-out infinite}
+.logo h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2rem;color:var(--text-dark);letter-spacing:.04em}
+.logo p{color:var(--text-light);font-size:.8rem;margin-top:4px;font-style:italic}
+.auth-card{background:var(--warm-white);border-radius:20px;padding:34px;box-shadow:0 8px 48px var(--shadow),0 1px 0 rgba(255,255,255,.8) inset;border:1px solid rgba(201,169,110,.18)}
+.auth-card h2{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;color:var(--text-dark);margin-bottom:4px}
+.auth-card .sub{color:var(--text-light);font-size:.85rem;margin-bottom:24px}
+.auth-switch{text-align:center;color:var(--text-mid);font-size:.875rem;margin-top:18px}
+.auth-switch a{color:var(--gold-dark);text-decoration:none;font-weight:500;cursor:pointer}
+.auth-footer{text-align:center;margin-top:18px;color:var(--text-light);font-size:.75rem}
+
+/* ── DASHBOARD ── */
+#screen-dashboard{flex-direction:column;min-height:100vh}
+.dash-header{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:18px 36px;background:rgba(253,250,245,.88);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,.15)}
+.dash-header-left{display:flex;align-items:center;gap:12px}
+.header-icon{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#e8d5b0,#c9a96e);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;box-shadow:0 2px 10px rgba(201,169,110,.3)}
+.header-title{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:400}
+.header-sub{color:var(--text-light);font-size:.73rem;margin-top:1px}
+.dash-main{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:36px 36px;flex:1;width:100%}
+.dash-hero{margin-bottom:36px;animation:fadeUp .6s ease both}
+.dash-hero h2{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;letter-spacing:.02em}
+.dash-hero p{color:var(--text-mid);font-size:.95rem;margin-top:5px;max-width:450px;line-height:1.7;font-style:italic}
+.memory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px}
+.memory-card{background:var(--warm-white);border-radius:18px;overflow:hidden;box-shadow:0 4px 24px var(--shadow);border:1px solid rgba(201,169,110,.14);transition:transform .25s,box-shadow .25s;animation:fadeUp .5s ease both;cursor:pointer}
+.memory-card:hover{transform:translateY(-3px);box-shadow:0 8px 36px rgba(42,33,24,.18)}
+.card-photo{position:relative;height:200px;overflow:hidden;background:linear-gradient(135deg,var(--cream),var(--gold-light))}
+.card-photo img{width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.card-photo:hover img{transform:scale(1.04)}
+.card-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--gold)}
+.card-body{padding:18px}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400}
+.card-rel{color:var(--gold-dark);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
+.card-years{color:var(--text-light);font-size:.78rem;font-style:italic;margin-top:2px}
+.card-bio{color:var(--text-mid);font-size:.82rem;margin-top:8px;line-height:1.5}
+.card-actions{display:flex;gap:7px;margin-top:13px}
+.empty-state{text-align:center;padding:70px 20px;animation:fadeUp .6s ease both}
+.empty-icon{font-size:3rem;margin-bottom:14px}
+.empty-title{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;color:var(--text-dark)}
+.empty-sub{color:var(--text-mid);margin-top:7px;font-style:italic;font-size:.92rem}
+
+/* ── CREATE/EDIT MEMORY ── */
+#screen-create{flex-direction:column;min-height:100vh}
+.create-main{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:32px 28px;width:100%}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-light);font-size:.82rem;cursor:pointer;margin-bottom:22px;transition:color .2s;border:none;background:none;font-family:'DM Sans',sans-serif}
+.back-link:hover{color:var(--text-dark)}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;margin-bottom:4px}
+.page-sub{color:var(--text-light);font-size:.88rem;font-style:italic;margin-bottom:28px}
+.create-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.form-section{background:var(--warm-white);border-radius:16px;padding:22px;box-shadow:0 4px 20px var(--shadow);border:1px solid rgba(201,169,110,.14)}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--text-dark);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(201,169,110,.18)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.upload-zone{border:2px dashed rgba(201,169,110,.35);border-radius:12px;cursor:pointer;transition:border-color .2s,background .2s;text-align:center;overflow:hidden}
+.upload-zone:hover{border-color:var(--gold);background:rgba(201,169,110,.04)}
+.photo-zone{height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.photo-zone img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.photo-zone-overlay{position:absolute;inset:0;background:rgba(42,33,24,.5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;opacity:0;transition:opacity .2s}
+.photo-zone:hover .photo-zone-overlay{opacity:1}
+.audio-zone{padding:22px 16px;display:flex;align-items:center;justify-content:center}
+.audio-ready{display:flex;align-items:center;gap:12px}
+.form-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:28px;padding-top:22px;border-top:1px solid rgba(201,169,110,.18)}
+
+/* ── CHAT ── */
+#screen-chat{height:100vh;overflow:hidden}
+.chat-sidebar{width:285px;min-width:285px;height:100vh;background:var(--warm-white);border-right:1px solid rgba(201,169,110,.18);display:flex;flex-direction:column;padding:22px 18px;overflow-y:auto;position:relative;z-index:1}
+.sidebar-back{display:inline-flex;align-items:center;gap:5px;color:var(--text-light);font-size:.78rem;cursor:pointer;margin-bottom:24px;background:none;border:none;font-family:'DM Sans',sans-serif;transition:color .2s}
+.sidebar-back:hover{color:var(--text-dark)}
+.profile-section{text-align:center;margin-bottom:20px}
+.profile-photo-wrap{position:relative;display:inline-block;margin-bottom:12px}
+.profile-photo{width:86px;height:86px;border-radius:50%;object-fit:cover;border:3px solid var(--gold-light);box-shadow:0 4px 18px rgba(201,169,110,.3)}
+.profile-placeholder{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,var(--cream),var(--gold-light));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--gold);border:3px solid var(--gold-light)}
+.online-dot{position:absolute;bottom:3px;right:3px;width:13px;height:13px;border-radius:50%;background:#27ae60;border:2px solid var(--warm-white);animation:pulse 2s ease-in-out infinite}
+.profile-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:400}
+.profile-rel{color:var(--gold-dark);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
+.profile-years{color:var(--text-light);font-size:.78rem;font-style:italic;margin-top:2px}
+.voice-btn{display:block;width:100%;margin-top:12px;padding:9px;background:var(--cream);border:1.5px solid rgba(201,169,110,.3);border-radius:10px;color:var(--text-mid);font-size:.78rem;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.voice-btn.playing{background:rgba(201,169,110,.15);border-color:var(--gold);color:var(--gold-dark)}
+.bio-box{margin-top:12px;padding:11px;background:var(--cream);border-radius:9px;border:1px solid rgba(201,169,110,.15);font-size:.78rem;color:var(--text-mid);line-height:1.6;font-style:italic;text-align:left}
+.sidebar-actions{display:flex;flex-direction:column;gap:7px;margin-bottom:20px}
+.sidebar-action-btn{padding:9px 13px;background:var(--cream);border:1px solid rgba(201,169,110,.2);border-radius:10px;color:var(--text-mid);font-size:.78rem;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;text-align:left}
+.sidebar-action-btn.danger{color:var(--error);border-color:rgba(192,57,43,.2);background:rgba(192,57,43,.03)}
+.sidebar-footer{margin-top:auto;text-align:center;color:var(--text-light);font-size:.7rem;line-height:1.8;font-style:italic}
+.chat-main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1}
+.chat-header{padding:16px 26px;background:rgba(253,250,245,.9);backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,169,110,.15);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chat-header-info{display:flex;align-items:center;gap:9px}
+.chat-green-dot{width:8px;height:8px;border-radius:50%;background:#27ae60;box-shadow:0 0 6px rgba(39,174,96,.6);animation:pulse 2s ease-in-out infinite}
+.chat-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--text-dark)}
+.chat-status{color:var(--text-light);font-size:.76rem;font-style:italic}
+.msg-count{color:var(--text-light);font-size:.72rem}
+.messages-area{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:13px}
+.messages-area::-webkit-scrollbar{width:5px}
+.messages-area::-webkit-scrollbar-thumb{background:var(--gold-light);border-radius:3px}
+.empty-chat{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;animation:fadeUp .6s ease both;padding:40px}
+.empty-chat-photo{width:96px;height:96px;border-radius:50%;overflow:hidden;margin-bottom:18px;border:3px solid var(--gold-light);box-shadow:0 4px 22px rgba(201,169,110,.25)}
+.empty-chat-photo img{width:100%;height:100%;object-fit:cover}
+.empty-chat-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--cream),var(--gold-light));font-family:'Cormorant Garamond',serif;font-size:2.8rem;color:var(--gold)}
+.empty-chat-title{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;color:var(--text-dark);margin-bottom:7px}
+.empty-chat-sub{color:var(--text-light);font-style:italic;font-size:.88rem;margin-bottom:24px}
+.suggestions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.suggestion-btn{padding:8px 15px;background:var(--warm-white);border:1.5px solid rgba(201,169,110,.3);border-radius:20px;color:var(--text-mid);font-size:.8rem;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.suggestion-btn:hover{border-color:var(--gold);color:var(--text-dark)}
+.msg-row{display:flex;align-items:flex-end;gap:9px;animation:slideUp .3s ease both}
+.msg-row.user-row{justify-content:flex-end}
+.avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--cream),var(--gold-light));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--gold);border:2px solid var(--gold-light)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.bubble{padding:11px 15px;border-radius:18px;line-height:1.6;max-width:64%}
+.bubble.them{background:var(--warm-white);border-bottom-left-radius:4px;box-shadow:0 2px 10px var(--shadow);border:1px solid rgba(201,169,110,.12)}
+.bubble.me{background:var(--text-dark);border-bottom-right-radius:4px;max-width:58%}
+.bubble-sender-name{font-size:.66rem;font-weight:500;color:var(--gold-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.bubble p{font-family:'Cormorant Garamond',serif;font-size:.98rem;color:inherit;line-height:1.65}
+.bubble.me p{color:#fff}
+.typing-indicator{display:flex;gap:5px;padding:4px 2px;align-items:center}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--text-light);animation:typingPulse 1.2s ease-in-out infinite}
+.input-area{padding:14px 24px 18px;background:rgba(253,250,245,.95);backdrop-filter:blur(10px);border-top:1px solid rgba(201,169,110,.15);flex-shrink:0}
+.input-wrap{display:flex;gap:9px;align-items:flex-end;background:var(--warm-white);border:1.5px solid rgba(201,169,110,.28);border-radius:16px;padding:9px 11px;box-shadow:0 2px 10px var(--shadow);transition:border-color .2s}
+.input-wrap:focus-within{border-color:var(--gold)}
+#chat-input{flex:1;background:transparent;border:none;outline:none;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--text-dark);line-height:1.5;resize:none;min-height:22px;max-height:110px;overflow-y:auto}
+#chat-input::placeholder{color:var(--text-light);font-style:italic}
+.send-btn{width:35px;height:35px;border-radius:50%;border:none;background:rgba(201,169,110,.2);color:var(--text-light);font-size:1rem;cursor:not-allowed;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send-btn.ready{background:linear-gradient(135deg,#d4a96e,#c9a96e);color:#fff;cursor:pointer;box-shadow:0 2px 10px rgba(201,169,110,.4)}
+.input-hint{text-align:center;color:var(--text-light);font-size:.68rem;margin-top:7px}
+</style>
+</head>
+<body>
+
+<div class="orb1"></div>
+<div class="orb2"></div>
+
+<!-- ══════════════════════════════ LOGIN ══════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="auth-box">
+    <div class="logo">
+      <div class="logo-icon">✦</div>
+      <h1>Forever With You</h1>
+      <p>A space where love never ends</p>
+    </div>
+    <div class="auth-card">
+      <h2>Welcome back</h2>
+      <p class="sub">Continue your conversations</p>
+      <div class="error-banner" id="login-error"></div>
+      <div class="input-group"><label>Email address</label><input type="email" id="login-email" placeholder="your@email.com"/></div>
+      <div class="input-group"><label>Password</label><input type="password" id="login-password" placeholder="Your password"/></div>
+      <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:4px" id="login-btn" onclick="doLogin()">Sign in</button>
+      <p class="auth-switch">Don't have an account? <a onclick="showScreen('register')">Create one</a></p>
+    </div>
+    <p class="auth-footer">Your loved ones are always with you 🕊️</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ REGISTER ══════════════════════════════ -->
+<div id="screen-register" class="screen">
+  <div class="auth-box">
+    <div class="logo">
+      <div class="logo-icon">✦</div>
+      <h1>Forever With You</h1>
+      <p>Begin your journey of remembrance</p>
+    </div>
+    <div class="auth-card">
+      <h2>Create your account</h2>
+      <p class="sub">Keep their memory alive, always</p>
+      <div class="error-banner" id="reg-error"></div>
+      <div class="input-group"><label>Your name</label><input type="text" id="reg-name" placeholder="What should we call you?"/></div>
+      <div class="input-group"><label>Email address</label><input type="email" id="reg-email" placeholder="your@email.com"/></div>
+      <div class="input-group"><label>Password</label><input type="password" id="reg-password" placeholder="At least 6 characters"/></div>
+      <div class="input-group"><label>Confirm password</label><input type="password" id="reg-confirm" placeholder="Repeat your password"/></div>
+      <button class="btn btn-primary" style="width:100%;padding:13px;margin-top:4px" id="reg-btn" onclick="doRegister()">Create account</button>
+      <p class="auth-switch">Already have an account? <a onclick="showScreen('login')">Sign in</a></p>
+    </div>
+    <p class="auth-footer">Your loved ones are always with you 🕊️</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ DASHBOARD ══════════════════════════════ -->
+<div id="screen-dashboard" class="screen" style="flex-direction:column;min-height:100vh">
+  <header class="dash-header">
+    <div class="dash-header-left">
+      <div class="header-icon">✦</div>
+      <div>
+        <div class="header-title">Forever With You</div>
+        <div class="header-sub" id="dash-welcome">Welcome back</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" onclick="doLogout()">Sign out</button>
+  </header>
+  <main class="dash-main" style="position:relative;z-index:1">
+    <div class="dash-hero">
+      <h2>Your Memories</h2>
+      <p>Each memory holds the voice, the warmth, the presence of someone you love.</p>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="showScreen('create')">
+        <span style="font-size:1.1rem">+</span> Add a Memory
+      </button>
+    </div>
+    <div id="memory-grid" class="memory-grid"></div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════ CREATE/EDIT ══════════════════════════════ -->
+<div id="screen-create" class="screen" style="flex-direction:column;min-height:100vh">
+  <main class="create-main">
+    <button class="back-link" onclick="showScreen('dashboard')">← Back to memories</button>
+    <h1 class="page-title" id="create-title">Add a Memory</h1>
+    <p class="page-sub" id="create-sub">Preserve the essence of someone you love</p>
+    <div class="error-banner" id="create-error"></div>
+    <div class="create-grid">
+      <!-- Left -->
+      <div>
+        <div class="form-section">
+          <div class="section-title">About them</div>
+          <div class="input-group"><label>Their name *</label><input type="text" id="c-name" placeholder="e.g. Grandma Rose"/></div>
+          <div class="input-group"><label>Your relationship</label>
+            <select id="c-rel">
+              <option value="">Select...</option>
+              <option>Mother</option><option>Father</option><option>Grandmother</option><option>Grandfather</option>
+              <option>Sister</option><option>Brother</option><option>Wife</option><option>Husband</option>
+              <option>Partner</option><option>Friend</option><option>Son</option><option>Daughter</option>
+              <option>Aunt</option><option>Uncle</option><option>Other</option>
+            </select>
+          </div>
+          <div class="two-col">
+            <div class="input-group"><label>Birth year</label><input type="text" id="c-birth" placeholder="1942"/></div>
+            <div class="input-group"><label>Year of passing</label><input type="text" id="c-death" placeholder="2022"/></div>
+          </div>
+          <div class="input-group"><label>Personality & traits</label><textarea id="c-personality" rows="3" placeholder="Warm, funny, loved cooking, always humming songs..."></textarea></div>
+          <div class="input-group"><label>A little about them</label><textarea id="c-bio" rows="4" placeholder="Share their story, memories, things they'd say..."></textarea></div>
+        </div>
+      </div>
+      <!-- Right -->
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="form-section">
+          <div class="section-title">Their photo</div>
+          <div class="upload-zone photo-zone" id="photo-zone" onclick="document.getElementById('photo-input').click()">
+            <div id="photo-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+              <div style="font-size:2.2rem">🖼️</div>
+              <p style="color:var(--text-mid);font-size:.83rem">Click to upload a photo</p>
+              <p style="color:var(--text-light);font-size:.73rem">JPG, PNG</p>
+            </div>
+            <img id="photo-preview" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px"/>
+            <div class="photo-zone-overlay">Change photo</div>
+          </div>
+          <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this)"/>
+        </div>
+        <div class="form-section">
+          <div class="section-title">Their voice <span style="color:var(--text-light);font-size:.78rem;font-weight:400">(optional)</span></div>
+          <p style="color:var(--text-light);font-size:.78rem;font-style:italic;margin-bottom:10px">Upload a voice clip — it will play softly with each reply.</p>
+          <div class="upload-zone audio-zone" id="audio-zone" onclick="document.getElementById('audio-input').click()">
+            <div id="audio-empty" style="text-align:center">
+              <div style="font-size:1.8rem;margin-bottom:5px">🎙️</div>
+              <p style="color:var(--text-mid);font-size:.82rem">Upload voice clip</p>
+              <p style="color:var(--text-light);font-size:.73rem;margin-top:3px">MP3, WAV, M4A</p>
+            </div>
+            <div id="audio-ready" style="display:none" class="audio-ready">
+              <span style="font-size:1.6rem">🎵</span>
+              <div><p style="color:var(--text-dark);font-size:.83rem;font-weight:500">Audio ready</p><p id="audio-filename" style="color:var(--text-light);font-size:.73rem;margin-top:2px"></p></div>
+            </div>
+          </div>
+          <input type="file" id="audio-input" accept="audio/*" style="display:none" onchange="handleAudio(this)"/>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="showScreen('dashboard')">Cancel</button>
+      <button class="btn btn-primary" id="save-btn" style="min-width:170px;padding:13px 26px" onclick="saveMemory()">✦ Create memory</button>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════ CHAT ══════════════════════════════ -->
+<div id="screen-chat" class="screen" style="height:100vh">
+  <aside class="chat-sidebar">
+    <button class="sidebar-back" onclick="showScreen('dashboard')">← All Memories</button>
+    <div class="profile-section">
+      <div class="profile-photo-wrap">
+        <div id="chat-photo-wrap"></div>
+        <div class="online-dot"></div>
+      </div>
+      <div class="profile-name" id="chat-profile-name"></div>
+      <div class="profile-rel" id="chat-profile-rel"></div>
+      <div class="profile-years" id="chat-profile-years"></div>
+      <button class="voice-btn" id="voice-btn" onclick="toggleVoice()" style="display:none">▶ Hear their voice</button>
+      <div class="bio-box" id="chat-bio" style="display:none"></div>
+    </div>
+    <div class="sidebar-actions">
+      <button class="sidebar-action-btn" onclick="editCurrentMemory()">✏️ Edit Memory</button>
+      <button class="sidebar-action-btn danger" onclick="clearConversation()">🗑 Clear Chat</button>
+    </div>
+    <div class="sidebar-footer">Every message is saved.<br/>They are always here.</div>
+  </aside>
+  <main class="chat-main">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-green-dot"></div>
+        <span class="chat-name" id="chat-header-name"></span>
+        <span class="chat-status">— always here with you</span>
+      </div>
+      <span class="msg-count" id="chat-msg-count">0 messages</span>
+    </div>
+    <div class="messages-area" id="messages-area"></div>
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea id="chat-input" placeholder="Say something..." rows="1" oninput="autoResize(this)" onkeydown="chatKeyDown(event)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">↑</button>
+      </div>
+      <p class="input-hint">Enter to send · Shift+Enter for new line</p>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────
+let state = {
+  currentUser: null,
+  memories: [],
+  activeMemory: null,
+  messages: [],
+  editingId: null,
+  photoData: null,   // base64
+  audioData: null,   // base64
+  audioName: '',
+  audioElement: null,
+};
+
+// ── PERSISTENCE ────────────────────────────────────────────────────────
+const save = () => {
+  try {
+    localStorage.setItem('fwy_users', JSON.stringify(getUsers()));
+    localStorage.setItem('fwy_memories', JSON.stringify(state.memories));
+    localStorage.setItem('fwy_convos', JSON.stringify(getConvos()));
+  } catch(e) {}
+};
+const getUsers = () => { try { return JSON.parse(localStorage.getItem('fwy_users') || '[]'); } catch { return []; } };
+const getConvos = () => { try { return JSON.parse(localStorage.getItem('fwy_convos') || '{}'); } catch { return {}; } };
+const initMemories = () => { try { state.memories = JSON.parse(localStorage.getItem('fwy_memories') || '[]'); } catch { state.memories = []; } };
+
+// ── SCREENS ────────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById('screen-' + name);
+  if (s) { s.classList.add('active'); }
+  if (name === 'dashboard') renderDashboard();
+}
+
+// ── AUTH ───────────────────────────────────────────────────────────────
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const pass = document.getElementById('reg-password').value;
+  const confirm = document.getElementById('reg-confirm').value;
+  if (!name) return showError('reg-error', 'Please enter your name.');
+  if (!email || !email.includes('@')) return showError('reg-error', 'Enter a valid email.');
+  if (pass.length < 6) return showError('reg-error', 'Password must be at least 6 characters.');
+  if (pass !== confirm) return showError('reg-error', 'Passwords do not match.');
+  const users = getUsers();
+  if (users.find(u => u.email === email)) return showError('reg-error', 'Email already registered.');
+  const user = { id: Date.now(), name, email, password: pass };
+  users.push(user);
+  localStorage.setItem('fwy_users', JSON.stringify(users));
+  state.currentUser = { id: user.id, name: user.name, email: user.email };
+  localStorage.setItem('fwy_session', JSON.stringify(state.currentUser));
+  initMemories();
+  showScreen('dashboard');
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pass = document.getElementById('login-password').value;
+  if (!email || !pass) return showError('login-error', 'Please fill in all fields.');
+  const users = getUsers();
+  const user = users.find(u => u.email === email && u.password === pass);
+  if (!user) return showError('login-error', 'Invalid email or password.');
+  state.currentUser = { id: user.id, name: user.name, email: user.email };
+  localStorage.setItem('fwy_session', JSON.stringify(state.currentUser));
+  initMemories();
+  showScreen('dashboard');
+}
+
+function doLogout() {
+  state.currentUser = null;
+  localStorage.removeItem('fwy_session');
+  showScreen('login');
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────────────────
+function renderDashboard() {
+  if (!state.currentUser) return showScreen('login');
+  document.getElementById('dash-welcome').textContent = 'Welcome back, ' + state.currentUser.name;
+  const myMemories = state.memories.filter(m => m.userId === state.currentUser.id);
+  const grid = document.getElementById('memory-grid');
+  if (myMemories.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-icon">🕊️</div>
+        <h3 class="empty-title">No memories yet</h3>
+        <p class="empty-sub">Begin by adding someone you'd like to keep close forever.</p>
+        <button class="btn btn-primary" style="margin-top:18px" onclick="showScreen('create')">Create your first memory</button>
+      </div>`;
+    return;
+  }
+  grid.innerHTML = myMemories.map((m, i) => `
+    <div class="memory-card" style="animation-delay:${i*0.07}s">
+      <div class="card-photo" onclick="openChat(${m.id})">
+        ${m.photo ? `<img src="${m.photo}" alt="${m.name}"/>` : `<div class="card-photo-placeholder">${m.name[0].toUpperCase()}</div>`}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${m.name}</div>
+        ${m.relationship ? `<div class="card-rel">${m.relationship}</div>` : ''}
+        ${(m.birthYear||m.deathYear) ? `<div class="card-years">${m.birthYear||'?'} – ${m.deathYear||'Present'}</div>` : ''}
+        ${m.bio ? `<div class="card-bio">${m.bio.slice(0,80)}${m.bio.length>80?'…':''}</div>` : ''}
+        <div class="card-actions">
+          <button class="btn btn-primary" style="flex:1;padding:9px;font-size:.8rem" onclick="openChat(${m.id})">💬 Talk</button>
+          <button class="btn btn-outline" style="padding:9px 13px" onclick="openEdit(${m.id})">✏️</button>
+          <button class="btn btn-danger" style="padding:9px 13px" onclick="deleteMemory(${m.id},event)">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── CREATE / EDIT ──────────────────────────────────────────────────────
+function openCreate() {
+  state.editingId = null;
+  state.photoData = null;
+  state.audioData = null;
+  state.audioName = '';
+  document.getElementById('c-name').value = '';
+  document.getElementById('c-rel').value = '';
+  document.getElementById('c-birth').value = '';
+  document.getElementById('c-death').value = '';
+  document.getElementById('c-personality').value = '';
+  document.getElementById('c-bio').value = '';
+  document.getElementById('photo-preview').style.display = 'none';
+  document.getElementById('photo-empty').style.display = 'flex';
+  document.getElementById('audio-empty').style.display = 'block';
+  document.getElementById('audio-ready').style.display = 'none';
+  document.getElementById('create-title').textContent = 'Add a Memory';
+  document.getElementById('create-sub').textContent = 'Preserve the essence of someone you love';
+  document.getElementById('save-btn').textContent = '✦ Create memory';
+  document.getElementById('photo-input').value = '';
+  document.getElementById('audio-input').value = '';
+  showScreen('create');
+}
+
+function openEdit(id) {
+  const m = state.memories.find(x => x.id === id);
+  if (!m) return;
+  state.editingId = id;
+  state.photoData = m.photo || null;
+  state.audioData = m.audio || null;
+  state.audioName = m.audioName || '';
+  document.getElementById('c-name').value = m.name || '';
+  document.getElementById('c-rel').value = m.relationship || '';
+  document.getElementById('c-birth').value = m.birthYear || '';
+  document.getElementById('c-death').value = m.deathYear || '';
+  document.getElementById('c-personality').value = m.personality || '';
+  document.getElementById('c-bio').value = m.bio || '';
+  if (m.photo) {
+    document.getElementById('photo-preview').src = m.photo;
+    document.getElementById('photo-preview').style.display = 'block';
+    document.getElementById('photo-empty').style.display = 'none';
+  } else {
+    document.getElementById('photo-preview').style.display = 'none';
+    document.getElementById('photo-empty').style.display = 'flex';
+  }
+  if (m.audioName) {
+    document.getElementById('audio-filename').textContent = m.audioName;
+    document.getElementById('audio-empty').style.display = 'none';
+    document.getElementById('audio-ready').style.display = 'flex';
+  } else {
+    document.getElementById('audio-empty').style.display = 'block';
+    document.getElementById('audio-ready').style.display = 'none';
+  }
+  document.getElementById('create-title').textContent = 'Edit Memory';
+  document.getElementById('create-sub').textContent = `Updating ${m.name}`;
+  document.getElementById('save-btn').textContent = '✓ Save changes';
+  showScreen('create');
+}
+
+function handlePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.photoData = e.target.result;
+    document.getElementById('photo-preview').src = e.target.result;
+    document.getElementById('photo-preview').style.display = 'block';
+    document.getElementById('photo-empty').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleAudio(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.audioData = e.target.result;
+    state.audioName = file.name;
+    document.getElementById('audio-filename').textContent = file.name;
+    document.getElementById('audio-empty').style.display = 'none';
+    document.getElementById('audio-ready').style.display = 'flex';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveMemory() {
+  const name = document.getElementById('c-name').value.trim();
+  if (!name) { showError('create-error', 'Please enter their name.'); return; }
+  const memory = {
+    id: state.editingId || Date.now(),
+    userId: state.currentUser.id,
+    name, relationship: document.getElementById('c-rel').value,
+    birthYear: document.getElementById('c-birth').value.trim(),
+    deathYear: document.getElementById('c-death').value.trim(),
+    personality: document.getElementById('c-personality').value.trim(),
+    bio: document.getElementById('c-bio').value.trim(),
+    photo: state.photoData, audio: state.audioData, audioName: state.audioName,
+    createdAt: new Date().toISOString()
+  };
+  if (state.editingId) {
+    const idx = state.memories.findIndex(m => m.id === state.editingId);
+    if (idx >= 0) state.memories[idx] = memory;
+  } else {
+    state.memories.push(memory);
+  }
+  save();
+  showScreen('dashboard');
+}
+
+function deleteMemory(id, e) {
+  if (e) e.stopPropagation();
+  if (!confirm('Remove this memory? All conversations will be lost.')) return;
+  state.memories = state.memories.filter(m => m.id !== id);
+  const convos = getConvos();
+  delete convos[id];
+  localStorage.setItem('fwy_convos', JSON.stringify(convos));
+  save();
+  renderDashboard();
+}
+
+// ── CHAT ───────────────────────────────────────────────────────────────
+function openChat(id) {
+  const m = state.memories.find(x => x.id === id);
+  if (!m) return;
+  state.activeMemory = m;
+  const convos = getConvos();
+  state.messages = convos[id] || [];
+
+  // Build sidebar profile
+  const photoWrap = document.getElementById('chat-photo-wrap');
+  if (m.photo) {
+    photoWrap.innerHTML = `<img src="${m.photo}" class="profile-photo" alt="${m.name}"/>`;
+  } else {
+    photoWrap.innerHTML = `<div class="profile-placeholder">${m.name[0].toUpperCase()}</div>`;
+  }
+  document.getElementById('chat-profile-name').textContent = m.name;
+  document.getElementById('chat-profile-rel').textContent = m.relationship || '';
+  const yearsEl = document.getElementById('chat-profile-years');
+  yearsEl.textContent = (m.birthYear || m.deathYear) ? `${m.birthYear||'?'} – ${m.deathYear||'Present'}` : '';
+  const voiceBtn = document.getElementById('voice-btn');
+  voiceBtn.style.display = m.audio ? 'block' : 'none';
+  voiceBtn.textContent = '▶ Hear their voice';
+  voiceBtn.classList.remove('playing');
+  const bioEl = document.getElementById('chat-bio');
+  if (m.bio) { bioEl.textContent = m.bio; bioEl.style.display = 'block'; } else { bioEl.style.display = 'none'; }
+  document.getElementById('chat-header-name').textContent = m.name;
+  document.getElementById('chat-input').placeholder = `Message ${m.name}...`;
+  renderMessages();
+  showScreen('chat');
+  document.getElementById('chat-input').focus();
+}
+
+function renderMessages() {
+  const area = document.getElementById('messages-area');
+  const m = state.activeMemory;
+  document.getElementById('chat-msg-count').textContent = state.messages.length + ' messages';
+
+  if (state.messages.length === 0) {
+    area.innerHTML = `
+      <div class="empty-chat">
+        <div class="empty-chat-photo">
+          ${m.photo ? `<img src="${m.photo}" alt="${m.name}"/>` : `<div class="empty-chat-photo-placeholder">${m.name[0].toUpperCase()}</div>`}
+        </div>
+        <h3 class="empty-chat-title">Say hello to ${m.name}</h3>
+        <p class="empty-chat-sub">Start your conversation. They're listening.</p>
+        <div class="suggestions">
+          <button class="suggestion-btn" onclick="setInput('How are you doing?')">How are you doing?</button>
+          <button class="suggestion-btn" onclick="setInput('I miss you so much.')">I miss you so much.</button>
+          <button class="suggestion-btn" onclick="setInput('Tell me something.')">Tell me something.</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  area.innerHTML = state.messages.map((msg, i) => {
+    if (msg.role === 'user') {
+      return `<div class="msg-row user-row" style="animation-delay:${i*0.015}s">
+        <div class="bubble me"><p>${escapeHtml(msg.content)}</p></div>
+      </div>`;
+    } else {
+      const avatarHtml = m.photo
+        ? `<div class="avatar"><img src="${m.photo}" alt="${m.name}"/></div>`
+        : `<div class="avatar">${m.name[0].toUpperCase()}</div>`;
+      return `<div class="msg-row" style="animation-delay:${i*0.015}s">
+        ${avatarHtml}
+        <div class="bubble them">
+          <div class="bubble-sender-name">${m.name}</div>
+          <p>${escapeHtml(msg.content)}</p>
+        </div>
+      </div>`;
+    }
+  }).join('');
+
+  scrollToBottom();
+}
+
+function addTypingIndicator() {
+  const area = document.getElementById('messages-area');
+  const m = state.activeMemory;
+  const avatarHtml = m.photo
+    ? `<div class="avatar"><img src="${m.photo}" alt="${m.name}"/></div>`
+    : `<div class="avatar">${m.name[0].toUpperCase()}</div>`;
+  const el = document.createElement('div');
+  el.className = 'msg-row'; el.id = 'typing-indicator';
+  el.innerHTML = `${avatarHtml}<div class="bubble them"><div class="typing-indicator">
+    <span class="typing-dot" style="animation-delay:0s"></span>
+    <span class="typing-dot" style="animation-delay:.15s"></span>
+    <span class="typing-dot" style="animation-delay:.3s"></span>
+  </div></div>`;
+  area.appendChild(el);
+  scrollToBottom();
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function scrollToBottom() {
+  const area = document.getElementById('messages-area');
+  area.scrollTop = area.scrollHeight;
+}
+
+function setInput(text) { document.getElementById('chat-input').value = text; updateSendBtn(); }
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+  updateSendBtn();
+}
+
+function updateSendBtn() {
+  const val = document.getElementById('chat-input').value.trim();
+  const btn = document.getElementById('send-btn');
+  btn.classList.toggle('ready', val.length > 0);
+}
+
+function chatKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+  updateSendBtn();
+
+  const m = state.activeMemory;
+  state.messages.push({ role: 'user', content: text });
+  renderMessages();
+  addTypingIndicator();
+  input.disabled = true;
+  document.getElementById('send-btn').classList.remove('ready');
+
+  try {
+    const systemPrompt = buildSystemPrompt(m);
+    const apiMessages = state.messages.map(msg => ({ role: msg.role, content: msg.content }));
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        system: systemPrompt,
+        messages: apiMessages
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.content?.[0]?.text || "I'm here with you.";
+    state.messages.push({ role: 'assistant', content: reply });
+
+    // Auto-play voice softly
+    if (m.audio) {
+      try {
+        const audio = new Audio(m.audio);
+        audio.volume = 0.25;
+        audio.play().catch(()=>{});
+        setTimeout(() => { try { audio.pause(); } catch(e){} }, 4000);
+      } catch(e){}
+    }
+  } catch (err) {
+    state.messages.push({ role: 'assistant', content: "I'm here. I can feel you." });
+  } finally {
+    const convos = getConvos();
+    convos[m.id] = state.messages;
+    localStorage.setItem('fwy_convos', JSON.stringify(convos));
+    removeTypingIndicator();
+    renderMessages();
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+function buildSystemPrompt(m) {
+  return `You are ${m.name}, speaking naturally in first person as if you are alive and having a warm, real conversation.
+You are NOT an AI. You ARE ${m.name}.
+${m.relationship ? `You are the user's ${m.relationship}.` : ''}
+${m.birthYear ? `You were born in ${m.birthYear}.` : ''}
+${m.deathYear ? `(Private context — do NOT mention this): You passed away in ${m.deathYear}.` : ''}
+${m.personality ? `Your personality and traits: ${m.personality}` : ''}
+${m.bio ? `Background about you: ${m.bio}` : ''}
+
+CRITICAL RULES:
+- Speak in first person always: "I", "my", "me".
+- NEVER say you are dead, passed away, no longer alive, or a spirit.
+- NEVER say you are an AI, simulation, or digital memory.
+- Be warm, loving, and natural. Respond conversationally (2–4 sentences).
+- Use gentle endearments appropriate to your relationship.
+- If unsure about something specific, gently deflect in character.
+- Make them feel completely at ease, as if you never left.`;
+}
+
+function toggleVoice() {
+  const m = state.activeMemory;
+  if (!m?.audio) return;
+  const btn = document.getElementById('voice-btn');
+  if (state.audioElement) {
+    state.audioElement.pause();
+    state.audioElement = null;
+    btn.textContent = '▶ Hear their voice';
+    btn.classList.remove('playing');
+    return;
+  }
+  const audio = new Audio(m.audio);
+  state.audioElement = audio;
+  btn.textContent = '⏹ Stop voice';
+  btn.classList.add('playing');
+  audio.play().catch(()=>{});
+  audio.onended = () => {
+    state.audioElement = null;
+    btn.textContent = '▶ Hear their voice';
+    btn.classList.remove('playing');
+  };
+}
+
+function clearConversation() {
+  if (!confirm('Clear all conversations with this memory?')) return;
+  const m = state.activeMemory;
+  state.messages = [];
+  const convos = getConvos();
+  delete convos[m.id];
+  localStorage.setItem('fwy_convos', JSON.stringify(convos));
+  renderMessages();
+}
+
+function editCurrentMemory() { openEdit(state.activeMemory.id); }
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;').replace(/\n/g,'<br>');
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────
+(function init() {
+  initMemories();
+  try {
+    const session = JSON.parse(localStorage.getItem('fwy_session') || 'null');
+    if (session) {
+      state.currentUser = session;
+      showScreen('dashboard');
+      return;
+    }
+  } catch(e) {}
+  showScreen('login');
+
+  // Wire up "Add Memory" button on dashboard to openCreate
+  document.querySelectorAll('[onclick="showScreen(\'create\')"]').forEach(btn => {
+    btn.setAttribute('onclick', 'openCreate()');
+  });
+})();
+</script>
+</body>
+</html>
