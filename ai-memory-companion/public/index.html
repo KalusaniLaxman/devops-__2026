@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ─── AUTH SCREEN ─── -->
+  <div id="auth-screen" class="screen">
+    <div class="auth-bg"></div>
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="logo-icon">✦</span>
+        <h1>Memory Companion</h1>
+        <p>Carry them with you, always.</p>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-form">
+        <input type="email" id="login-email" placeholder="Email address" />
+        <input type="password" id="login-password" placeholder="Password" />
+        <button class="btn-primary" onclick="login()">Sign In</button>
+        <p class="switch-link">New here? <a href="#" onclick="showRegister()">Create account</a></p>
+        <div id="auth-error" class="error-msg"></div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form" style="display:none">
+        <input type="text" id="reg-name" placeholder="Your name" />
+        <input type="email" id="reg-email" placeholder="Email address" />
+        <input type="password" id="reg-password" placeholder="Password" />
+        <button class="btn-primary" onclick="register()">Create Account</button>
+        <p class="switch-link">Already have an account? <a href="#" onclick="showLogin()">Sign in</a></p>
+        <div id="reg-error" class="error-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MAIN APP ─── -->
+  <div id="app-screen" class="screen" style="display:none">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="brand">✦ Memory</div>
+        <span id="user-name-display" class="user-greeting"></span>
+      </div>
+
+      <button class="btn-add" onclick="showAddProfile()">+ New Memory</button>
+
+      <div id="profiles-list" class="profiles-list">
+        <p class="empty-hint">No memories yet.<br/>Add one above.</p>
+      </div>
+
+      <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </aside>
+
+    <!-- Main Area -->
+    <main class="main-area">
+
+      <!-- Empty state -->
+      <div id="empty-state" class="empty-state">
+        <div class="empty-icon">✦</div>
+        <h2>Select a memory to begin</h2>
+        <p>Choose someone from the sidebar, or create a new memory profile.</p>
+      </div>
+
+      <!-- Add Profile Panel -->
+      <div id="add-profile-panel" class="panel" style="display:none">
+        <div class="panel-header">
+          <button class="btn-back" onclick="showEmptyState()">← Back</button>
+          <h2>New Memory Profile</h2>
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label>Their name</label>
+            <input type="text" id="p-name" placeholder="e.g. Grandma Rose" />
+          </div>
+          <div class="form-group">
+            <label>Your relationship</label>
+            <input type="text" id="p-relation" placeholder="e.g. grandmother, best friend, mentor" />
+          </div>
+          <div class="form-group">
+            <label>Personality</label>
+            <select id="p-personality">
+              <option value="kind">Kind & Warm</option>
+              <option value="funny">Funny & Playful</option>
+              <option value="calm">Calm & Peaceful</option>
+              <option value="serious">Serious & Thoughtful</option>
+              <option value="gentle">Gentle & Nurturing</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>About them <span class="optional">(optional)</span></label>
+            <textarea id="p-bio" placeholder="A few words about who they were..." rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Photo <span class="optional">(optional)</span></label>
+            <input type="file" id="p-image" accept="image/*" class="file-input" />
+          </div>
+          <div class="form-group">
+            <label>Voice samples <span class="optional">(optional, stored for future use)</span></label>
+            <input type="file" id="p-audio" accept="audio/*" multiple class="file-input" />
+          </div>
+          <button class="btn-primary" onclick="createProfile()">Create Memory Profile</button>
+          <div id="profile-error" class="error-msg"></div>
+        </div>
+      </div>
+
+      <!-- Chat Panel -->
+      <div id="chat-panel" class="panel" style="display:none">
+        <div class="chat-header">
+          <button class="btn-back-mobile" onclick="showEmptyState()">←</button>
+          <div id="chat-avatar-wrap" class="chat-avatar-wrap">
+            <img id="chat-avatar" src="" alt="" />
+            <div id="chat-avatar-initials" class="avatar-initials"></div>
+          </div>
+          <div class="chat-profile-info">
+            <h3 id="chat-name"></h3>
+            <span id="chat-relation"></span>
+          </div>
+          <button class="btn-clear" onclick="clearChat()" title="Clear conversation">🗑</button>
+        </div>
+
+        <!-- Voice notice -->
+        <div class="voice-notice">🔊 Voice playback not available (demo mode)</div>
+
+        <div id="messages-box" class="messages-box">
+          <div class="messages-loading">Loading conversation…</div>
+        </div>
+
+        <!-- Typing indicator -->
+        <div id="typing-indicator" class="typing-indicator" style="display:none">
+          <span></span><span></span><span></span>
+        </div>
+
+        <div class="chat-input-area">
+          <input type="text" id="msg-input" placeholder="Write a message…" onkeydown="if(event.key==='Enter') sendMessage()" />
+          <button class="btn-send" onclick="sendMessage()">↑</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
